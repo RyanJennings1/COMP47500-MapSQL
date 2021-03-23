@@ -61,5 +61,15 @@ public class Table {
 	}
 	
 	public void delete(Condition where) throws SQLException {
+		//
+		Position<Row> current = this.rows.first();
+		for (Row row : rows) {
+			if (row.satisfies(where, description)) {
+				rows.remove(current);
+				break;
+			}
+			current = this.rows.next(current);
+		}
+		//
 	}
 }

@@ -21,6 +21,16 @@ public class DropTable implements SQLStatement {
 	
 	@Override
 	public SQLResult execute(Map<String, Table> tables) throws SQLException {
+		if (this.name.equals("mapsql.tables")) {
+			throw new SQLException("Table 'mapsql.tables' cannot be modified");
+		}
+
+		// TODO: Check not null
+
+		tables.remove(this.name);
+		// Remove the row recording the able in the mapsql.tables table
+		tables.get("mapsql.tables").delete(new Equals("table", this.name));
+
 		return new SQLResult() {
 			public String toString() {
 				return "OK";

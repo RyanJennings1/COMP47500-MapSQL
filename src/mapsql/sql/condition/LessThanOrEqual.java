@@ -21,7 +21,8 @@ public class LessThanOrEqual extends AbstractCondition {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean evaluate(TableDescription description, Map<String, String> data) throws SQLException {
-		return false;
+		Field field = description.findField(column);
+		return comparator.compare(field.toValue(data.get(column)), field.toValue(value)) <= 0;
 	}
 
 }

@@ -2,6 +2,9 @@ package mapsql.sql.test;
 
 import mapsql.sql.condition.Equals;
 import mapsql.sql.condition.LessThan;
+import mapsql.sql.condition.LessThanOrEqual;
+import mapsql.sql.condition.GreaterThan;
+import mapsql.sql.condition.GreaterThanOrEqual;
 import mapsql.sql.condition.OrCondition;
 import mapsql.sql.core.Condition;
 import mapsql.sql.core.Field;
@@ -42,6 +45,9 @@ public class ExampleTestProgram {
 		showTables();
 
 		testLessThan();
+		testLessThanOrEqual();
+		testGreaterThan();
+		testGreaterThanOrEqual();
 	}
 
 	private static void executeStatement(SQLStatement statement) {
@@ -163,6 +169,162 @@ public class ExampleTestProgram {
 			);
 			System.out.println(result);
 			assertResult("testLessThan: Expected: %b, Actual: %b\n", true, result.rows().size() == 1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		// Drop table
+		executeStatement(new DropTable("contacts"));
+	}
+
+	public static void testLessThanOrEqual() {
+		// Create new table
+		executeStatement(new CreateTable(
+							"contacts", 
+							new Field[] {
+								new INTEGER("id", true, false, true), 
+								new CHARACTER("name", 30, false, true), 
+								new CHARACTER("email", 30, false, false)
+							}
+						)
+		);
+		// Add in three contacts
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"Rem", "rem.collier@ucd.ie"}
+				)
+		);
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"John", "john.murphy@ucd.ie"}
+				)
+		);
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"Liam", "liam.murphy@ucd.ie"}
+				)
+		);
+		// Check select returns 2 of 3 contacts
+		try {
+			SQLResult result = manager.execute(
+					new Select(
+						"contacts",
+						new String[] { "id", "name" },
+						new LessThanOrEqual("id", "2")
+					)
+			);
+			System.out.println(result);
+			assertResult("testLessThanOrEqual: Expected: %b, Actual: %b\n", true, result.rows().size() == 2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		// Drop table
+		executeStatement(new DropTable("contacts"));
+	}
+
+	public static void testGreaterThan() {
+		// Create new table
+		executeStatement(new CreateTable(
+							"contacts", 
+							new Field[] {
+								new INTEGER("id", true, false, true), 
+								new CHARACTER("name", 30, false, true), 
+								new CHARACTER("email", 30, false, false)
+							}
+						)
+		);
+		// Add in three contacts
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"Rem", "rem.collier@ucd.ie"}
+				)
+		);
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"John", "john.murphy@ucd.ie"}
+				)
+		);
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"Liam", "liam.murphy@ucd.ie"}
+				)
+		);
+		// Check select returns 2 of 3 contacts
+		try {
+			SQLResult result = manager.execute(
+					new Select(
+						"contacts",
+						new String[] { "id", "name" },
+						new GreaterThan("id", "2")
+					)
+			);
+			System.out.println(result);
+			assertResult("testGreaterThan: Expected: %b, Actual: %b\n", true, result.rows().size() == 1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		
+		// Drop table
+		executeStatement(new DropTable("contacts"));
+	}
+
+	public static void testGreaterThanOrEqual() {
+		// Create new table
+		executeStatement(new CreateTable(
+							"contacts", 
+							new Field[] {
+								new INTEGER("id", true, false, true), 
+								new CHARACTER("name", 30, false, true), 
+								new CHARACTER("email", 30, false, false)
+							}
+						)
+		);
+		// Add in three contacts
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"Rem", "rem.collier@ucd.ie"}
+				)
+		);
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"John", "john.murphy@ucd.ie"}
+				)
+		);
+		executeStatement(
+				new Insert(
+						"contacts", 
+						new String[] {"name", "email"}, 
+						new String[] {"Liam", "liam.murphy@ucd.ie"}
+				)
+		);
+		// Check select returns 2 of 3 contacts
+		try {
+			SQLResult result = manager.execute(
+					new Select(
+						"contacts",
+						new String[] { "id", "name" },
+						new GreaterThanOrEqual("id", "2")
+					)
+			);
+			System.out.println(result);
+			assertResult("testGreaterThan: Expected: %b, Actual: %b\n", true, result.rows().size() == 2);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
