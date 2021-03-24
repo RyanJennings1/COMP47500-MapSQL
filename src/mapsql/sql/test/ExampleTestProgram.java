@@ -1,10 +1,11 @@
 package mapsql.sql.test;
 
 import mapsql.sql.condition.Equals;
-import mapsql.sql.condition.LessThan;
-import mapsql.sql.condition.LessThanOrEqual;
 import mapsql.sql.condition.GreaterThan;
 import mapsql.sql.condition.GreaterThanOrEqual;
+import mapsql.sql.condition.LessThan;
+import mapsql.sql.condition.LessThanOrEqual;
+import mapsql.sql.condition.Like;
 import mapsql.sql.condition.OrCondition;
 import mapsql.sql.core.Condition;
 import mapsql.sql.core.Field;
@@ -48,6 +49,10 @@ public class ExampleTestProgram {
 		testLessThanOrEqual();
 		testGreaterThan();
 		testGreaterThanOrEqual();
+
+		testLikeStartOfString();
+		testLikeEndOfString();
+		testLikeBothSidesOfString();
 	}
 
 	private static void executeStatement(SQLStatement statement) {
@@ -133,31 +138,7 @@ public class ExampleTestProgram {
 	}
 
 	public static void testLessThan() {
-		// Create new table
-		executeStatement(new CreateTable(
-							"contacts", 
-							new Field[] {
-								new INTEGER("id", true, false, true), 
-								new CHARACTER("name", 30, false, true), 
-								new CHARACTER("email", 30, false, false)
-							}
-						)
-		);
-		// Add in two contacts
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"Rem", "rem.collier@ucd.ie"}
-				)
-		);
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"John", "john.murphy@ucd.ie"}
-				)
-		);
+		before();
 		// Check select returns 1 of 2 contacts
 		try {
 			SQLResult result = manager.execute(
@@ -172,44 +153,11 @@ public class ExampleTestProgram {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		// Drop table
-		executeStatement(new DropTable("contacts"));
+		after();
 	}
 
 	public static void testLessThanOrEqual() {
-		// Create new table
-		executeStatement(new CreateTable(
-							"contacts", 
-							new Field[] {
-								new INTEGER("id", true, false, true), 
-								new CHARACTER("name", 30, false, true), 
-								new CHARACTER("email", 30, false, false)
-							}
-						)
-		);
-		// Add in three contacts
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"Rem", "rem.collier@ucd.ie"}
-				)
-		);
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"John", "john.murphy@ucd.ie"}
-				)
-		);
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"Liam", "liam.murphy@ucd.ie"}
-				)
-		);
+		before();
 		// Check select returns 2 of 3 contacts
 		try {
 			SQLResult result = manager.execute(
@@ -224,44 +172,11 @@ public class ExampleTestProgram {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		// Drop table
-		executeStatement(new DropTable("contacts"));
+		after();
 	}
 
 	public static void testGreaterThan() {
-		// Create new table
-		executeStatement(new CreateTable(
-							"contacts", 
-							new Field[] {
-								new INTEGER("id", true, false, true), 
-								new CHARACTER("name", 30, false, true), 
-								new CHARACTER("email", 30, false, false)
-							}
-						)
-		);
-		// Add in three contacts
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"Rem", "rem.collier@ucd.ie"}
-				)
-		);
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"John", "john.murphy@ucd.ie"}
-				)
-		);
-		executeStatement(
-				new Insert(
-						"contacts", 
-						new String[] {"name", "email"}, 
-						new String[] {"Liam", "liam.murphy@ucd.ie"}
-				)
-		);
+		before();
 		// Check select returns 2 of 3 contacts
 		try {
 			SQLResult result = manager.execute(
@@ -276,12 +191,86 @@ public class ExampleTestProgram {
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		
-		// Drop table
-		executeStatement(new DropTable("contacts"));
+		after();
 	}
 
 	public static void testGreaterThanOrEqual() {
+		before();
+		// Check select returns 2 of 3 contacts
+		try {
+			SQLResult result = manager.execute(
+					new Select(
+						"contacts",
+						new String[] { "id", "name" },
+						new GreaterThanOrEqual("id", "2")
+					)
+			);
+			System.out.println(result);
+			assertResult("testGreaterThanOrEqual: Expected: %b, Actual: %b\n", true, result.rows().size() == 2);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		after();
+	}
+
+	public static void testLikeStartOfString() {
+		before();
+		try {
+			SQLResult result = manager.execute(
+					new Select(
+						"contacts",
+						new String[] { "id", "name" },
+						new Like("name", "%hn")
+					)
+			);
+			System.out.println(result);
+			assertResult("testLikeStartOfString: Expected: %b, Actual: %b\n", true, result.rows().size() == 1);
+			//assertResult("testLikeStartOfString: Expected: %s, Actual: %s\n", "John", result.rows().get("name") == 1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		after();
+	}
+
+	public static void testLikeEndOfString() {
+		before();
+		try {
+			SQLResult result = manager.execute(
+					new Select(
+						"contacts",
+						new String[] { "id", "name" },
+						new Like("name", "R%")
+					)
+			);
+			System.out.println(result);
+			assertResult("testLikeEndOfString: Expected: %b, Actual: %b\n", true, result.rows().size() == 1);
+			//assertResult("testLikeStartOfString: Expected: %s, Actual: %s\n", "John", result.rows().get("name") == 1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		after();
+	}
+
+	public static void testLikeBothSidesOfString() {
+		before();
+		try {
+			SQLResult result = manager.execute(
+					new Select(
+						"contacts",
+						new String[] { "id", "name" },
+						new Like("name", "%o%")
+					)
+			);
+			System.out.println(result);
+			assertResult("testLikeEndOfString: Expected: %b, Actual: %b\n", true, result.rows().size() == 1);
+			//assertResult("testLikeBothSidesOfString: Expected: %s, Actual: %s\n", "John", result.rows().get("name") == 1);
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		after();
+	}
+
+	private static void before() {
 		// Create new table
 		executeStatement(new CreateTable(
 							"contacts", 
@@ -314,21 +303,9 @@ public class ExampleTestProgram {
 						new String[] {"Liam", "liam.murphy@ucd.ie"}
 				)
 		);
-		// Check select returns 2 of 3 contacts
-		try {
-			SQLResult result = manager.execute(
-					new Select(
-						"contacts",
-						new String[] { "id", "name" },
-						new GreaterThanOrEqual("id", "2")
-					)
-			);
-			System.out.println(result);
-			assertResult("testGreaterThan: Expected: %b, Actual: %b\n", true, result.rows().size() == 2);
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-		
+	}
+
+	private static void after() {
 		// Drop table
 		executeStatement(new DropTable("contacts"));
 	}

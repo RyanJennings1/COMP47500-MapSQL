@@ -19,6 +19,15 @@ public class Like extends AbstractCondition {
 	@SuppressWarnings("unchecked")
 	@Override
 	public boolean evaluate(TableDescription description, Map<String, String> data) throws SQLException {
+		Field field = description.findField(column);
+		String query = data.get(column);
+		if (value.startsWith("%") && !value.endsWith("%")) {
+			return query.endsWith(value.substring(1));
+		} else if (value.endsWith("%") && !value.startsWith("%")) {
+			return query.startsWith(value.substring(0, value.length()-1));
+		} else if (value.contains("%")){
+			return query.contains(value.split("%")[1]);
+		}
 		return false;
 	}
 }
