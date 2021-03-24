@@ -22,6 +22,8 @@ import mapsql.sql.statement.Insert;
 import mapsql.sql.statement.Select;
 import mapsql.sql.statement.Update;
 
+import mapsql.sql.core.Row;
+
 public class ExampleTestProgram {
 	static SQLManager manager = new SQLManager();
 	
@@ -53,6 +55,10 @@ public class ExampleTestProgram {
 		testLikeStartOfString();
 		testLikeEndOfString();
 		testLikeBothSidesOfString();
+
+		testUpdate();
+
+		testCheckNotNull();
 	}
 
 	private static void executeStatement(SQLStatement statement) {
@@ -270,16 +276,95 @@ public class ExampleTestProgram {
 		after();
 	}
 
+	public static void testUpdate() {
+		before();
+		try {
+			executeStatement(
+					new Update(
+							"contacts", 
+							new String[] {"email"}, 
+							new String[] {"henry.mcloughlin@ucd.ie"}, 
+							new Equals("id", "2")
+					)
+			);
+			SQLResult selectResult = manager.execute(
+					new Select(
+							"contacts", 
+							new String[] {"id", "email"},
+							new Equals("id", "2")
+					)
+			);
+			assertResult("testUpdate rows returned: Expected: %b, Actual: %b\n", true, selectResult.rows().size() == 1);
+			for (Row row: selectResult.rows()) {
+				assertResult("testUpdate value updated: Expected: %b, Actual: %b\n",
+						true,
+						row.get("email").equals("henry.mcloughlin@ucd.ie"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		after();
+	}
+
+	public static void testCheckNotNull() {
+		before();
+		// Insert with not null field missing to throw an error
+		//no name
+		Boolean errorThrown = false;
+		try {
+			manager.execute(
+					new Insert(
+						"contacts", 
+						new String[] {"email"}, 
+						new String[] {"pat.burke@ucd.ie"}
+					)
+			);
+		} catch (SQLException e) {
+			errorThrown = true;
+			assertResult("testCheckNotNull insert error: Expected: %b, Actual: %b\n",
+					true,
+					e.getMessage().equals("Missing Value for NOT NULL field 'name'"));
+		}
+		assertResult("testCheckNotNull error thrown: Expected: %b, Actual: %b\n", true, errorThrown);
+		// Insert with fields filled no error and record created
+		executeStatement(
+				new Insert(
+					"contacts", 
+					new String[] {"name", "email"}, 
+					new String[] {"Pat", "pat.burke@ucd.ie"}
+				)
+		);
+		try {
+			SQLResult selectResult = manager.execute(
+					new Select(
+							"contacts", 
+							new String[] {"id", "name"},
+							new Equals("name", "Pat")
+					)
+			);
+			assertResult("testCheckNotNull rows returned: Expected: %b, Actual: %b\n", true, selectResult.rows().size() == 1);
+			for (Row row: selectResult.rows()) {
+				assertResult("testCheckNotNull name inserted: Expected: %b, Actual: %b\n",
+						true,
+						row.get("name").equals("Pat"));
+			}
+		} catch (SQLException e) {
+			System.out.println(e.getStackTrace());
+		}
+		after();
+	}
+
 	private static void before() {
 		// Create new table
-		executeStatement(new CreateTable(
-							"contacts", 
-							new Field[] {
-								new INTEGER("id", true, false, true), 
-								new CHARACTER("name", 30, false, true), 
-								new CHARACTER("email", 30, false, false)
-							}
-						)
+		executeStatement(
+				new CreateTable(
+					"contacts", 
+					new Field[] {
+						new INTEGER("id", true, false, true), 
+						new CHARACTER("name", 30, false, true), 
+						new CHARACTER("email", 30, false, false)
+					}
+				)
 		);
 		// Add in three contacts
 		executeStatement(

@@ -1,5 +1,9 @@
 package mapsql.sql.core;
 
+import java.util.Arrays;
+import java.util.Set;
+import java.util.HashSet;
+
 public class TableDescription {
 	private String name;
 	private Field[] fields;
@@ -56,6 +60,12 @@ public class TableDescription {
 	 * @throws SQLException 
 	 */
 	public void checkForNotNulls(String[] cols) throws SQLException {
+		Set<String> colSet = new HashSet<>(Arrays.asList(cols));
+		for (Field field: this.fields) {
+			if (field.isNotNull() && !colSet.contains(field.name())) {
+				throw new SQLException("Missing Value for NOT NULL field '" + field.name() + "'");
+			}
+		}
 	}
 
 }

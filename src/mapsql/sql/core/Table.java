@@ -58,10 +58,17 @@ public class Table {
 	}
 
 	public void update(String[] columns, String[] values, Condition where) throws SQLException {
+		for (Row row: this.rows) {
+			// TODO: null checks
+			if (row.satisfies(where, this.description)) { 
+				for (int i = 0; i < columns.length; i++) {
+					row.data.put(columns[i], values[i]);
+				}
+			}
+		}
 	}
 	
 	public void delete(Condition where) throws SQLException {
-		//
 		Position<Row> current = this.rows.first();
 		for (Row row : rows) {
 			if (row.satisfies(where, description)) {
@@ -70,6 +77,5 @@ public class Table {
 			}
 			current = this.rows.next(current);
 		}
-		//
 	}
 }
