@@ -37,7 +37,7 @@ public class ExampleTestProgram {
 		insertPartialData();
 		selectTable();
 		
-//		updateData();
+		updateData();
 		updateOrData();
 		selectTable();
 
