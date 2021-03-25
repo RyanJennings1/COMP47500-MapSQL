@@ -31,7 +31,7 @@ public class Sources implements SQLCommand {
 				String sql = scanner.nextLine();
 				
 				try {
-					SimpleNode n = new MapSQL(new ByteArrayInputStream( sql.getBytes() ) ).Start();
+					SimpleNode n = new MapSQL(new ByteArrayInputStream(sql.getBytes())).Start();
 
 					List<SQLOperation> operations = (List<SQLOperation>) n.jjtAccept(new SQLVisitor(), null);
 					for (SQLOperation operation : operations) {

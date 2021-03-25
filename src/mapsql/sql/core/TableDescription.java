@@ -60,6 +60,8 @@ public class TableDescription {
 	 * @throws SQLException 
 	 */
 	public void checkForNotNulls(String[] cols) throws SQLException {
+		// Create a set of the columns so in the for loop we have a O(1)
+		// lookup to see if the column is present
 		Set<String> colSet = new HashSet<>(Arrays.asList(cols));
 		for (Field field: this.fields) {
 			if (field.isNotNull() && !colSet.contains(field.name())) {

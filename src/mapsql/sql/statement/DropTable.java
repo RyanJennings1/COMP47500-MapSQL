@@ -25,10 +25,12 @@ public class DropTable implements SQLStatement {
 			throw new SQLException("Table 'mapsql.tables' cannot be modified");
 		}
 
-		// TODO: Check not null, check if table is in tables
+		if (tables.get(this.name) == null) {
+			throw new SQLException("Table not found");
+		}
 
 		tables.remove(this.name);
-		// Remove the row recording the able in the mapsql.tables table
+		// Remove the row recording the table in the mapsql.tables table
 		tables.get("mapsql.tables").delete(new Equals("table", this.name));
 
 		return new SQLResult() {

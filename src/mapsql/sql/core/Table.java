@@ -57,9 +57,15 @@ public class Table {
 		rows.insertLast(new Row(data));
 	}
 
+	/**
+	 * @description: Find the rows that match and then for each column, value pair given update the row
+	 * @param columns: Column names on table
+	 * @param values: Values to update for column names
+	 * @param where: Condition to find matching rows
+	 * @throws SQLException
+	 */
 	public void update(String[] columns, String[] values, Condition where) throws SQLException {
 		for (Row row: this.rows) {
-			// TODO: null checks
 			if (row.satisfies(where, this.description)) { 
 				for (int i = 0; i < columns.length; i++) {
 					row.data.put(columns[i], values[i]);
@@ -67,10 +73,15 @@ public class Table {
 			}
 		}
 	}
-	
+
+	/**
+	 * @description: Iterate through linked list and if row found, remove it 
+	 * @param where: Condition to find matching rows
+	 * @throws SQLException
+	 */
 	public void delete(Condition where) throws SQLException {
 		Position<Row> current = this.rows.first();
-		for (Row row : rows) {
+		for (Row row: rows) {
 			if (row.satisfies(where, description)) {
 				rows.remove(current);
 				break;
